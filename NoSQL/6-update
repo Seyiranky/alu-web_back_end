@@ -1,8 +1,4 @@
-// Adds a new attribute to documents in the school collection.
-// db.school.updateMany(
-//     {name: "ALX"},
-//     {$set: {address: "972 Mission street"}}
-// );
+// Updates all documents with name="ALX" by adding address
 db.school.updateMany(
   { name: "ALX" },
   { $set: { address: "972 Mission street" } }

@@ -1,31 +1,34 @@
 #!/usr/bin/env python3
-""" log stats 
-"""
+"""Log stats"""
 from pymongo import MongoClient
 
 
-def main(collection, options=None):
-    """ log stats"""
-    
+def main(collection):
+    """Print statistics about nginx logs"""
 
-    num_logs = collection.count({})
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    results = [0, 0, 0, 0, 0]
-    num_status_check = collection.count({"method": "GET", "path": "/status"})
-    for method in methods:
-        num_method = collection.count({"method": method})
-        results[methods.index(method)] = num_method
-    
+    # Total number of logs
+    num_logs = collection.count_documents({})
     print("{} logs".format(num_logs))
+
     print("Methods:")
+
+    # List of HTTP methods
+    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+
+    # Count logs per method
     for method in methods:
-        print("\tmethod {}: {}".format(method, results[methods.index(method)]))
-    
-    print("{} status check".format(num_status_check))
+        count = collection.count_documents({"method": method})
+        print("\tmethod {}: {}".format(method, count))
+
+    # Count GET requests to /status
+    status_count = collection.count_documents(
+        {"method": "GET", "path": "/status"}
+    )
+    print("{} status check".format(status_count))
 
 
 if __name__ == "__main__":
     client = MongoClient()
     db = client.logs
-    logs = db.nginx
-    main(logs)
+    collection = db.nginx
+    main(collection)

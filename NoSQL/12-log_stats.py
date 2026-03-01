@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
-""" log stats 
-"""
+"""Nginx log stats"""
 from pymongo import MongoClient
-
-
-def main(collection, options=None):
-    """ log stats"""
-    
-
-    num_logs = collection.count({})
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    results = [0, 0, 0, 0, 0]
-    num_status_check = collection.count({"method": "GET", "path": "/status"})
-    for method in methods:
-        num_method = collection.count({"method": method})
-        results[methods.index(method)] = num_method
-    
-    print("{} logs".format(num_logs))
-    print("Methods:")
-    for method in methods:
-        print("\tmethod {}: {}".format(method, results[methods.index(method)]))
-    
-    print("{} status check".format(num_status_check))
 
 
 if __name__ == "__main__":
     client = MongoClient()
     db = client.logs
-    logs = db.nginx
-    main(logs)
+    collection = db.nginx
+
+    # Total logs
+    print("{} logs".format(collection.count_documents({})))
+
+    print("Methods:")
+
+    # Methods in required order
+    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    for method in methods:
+        print("\tmethod {}: {}".format(
+            method,
+            collection.count_documents({"method": method})
+        ))
+
+    # GET /status count
+    print("{} status check".format(
+        collection.count_documents({
+            "method": "GET",
+            "path": "/status"
+        })
+    ))
